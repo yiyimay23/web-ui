@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @File: getyaml.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2020/10/27  10:33
 
 import os
 import pickle

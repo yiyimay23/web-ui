@@ -1,3 +1,0 @@
-"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
-"failed","Fri Jun 10 11:46:00 CST 2022","Fri Jun 10 11:46:04 CST 2022","4188","case.web_demo","test_baidu1","TestBaiDu","","","输入内容并搜索","输入多参数搜索"
-"failed","Fri Jun 10 11:46:09 CST 2022","Fri Jun 10 11:46:12 CST 2022","3961","case.web_demo","test_baidu1","TestBaiDu","","","输入内容并搜索","输入多参数搜索"

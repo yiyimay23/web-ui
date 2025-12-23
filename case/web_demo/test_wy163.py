@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 # @File: test_demo.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2020/10/26  11:08
 
 import os
 
@@ -23,7 +20,7 @@ class TestWangYi:
     @allure.description('测试iffrom')  # 用例描述
     @pytest.mark.testwy_web  # 用列标记
     @pytest.mark.parametrize('user,pwd', reda_pytestdata(__file__, 'test_wy63_go'))  # 测试数据
-    def test_wy63_go(self, goDriver,user,pwd):
+    def test_wy63_go(self, goDriver, user, pwd):
         wy = WangYi(goDriver)
 
         with allure.step('跳转iffrom'):
@@ -41,4 +38,3 @@ class TestWangYi:
         with allure.step('登录'):
             wy.input_sub()
             wy.sleep(5)
-

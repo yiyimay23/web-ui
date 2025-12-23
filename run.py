@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 # @File: run.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2020/10/26  19:04
 
 import os
 import sys
@@ -21,8 +18,7 @@ from public.emails import SendEMail
 
 OUT_TITLE = """
 ══════════════════════════════════════════
-║            WEB-UI-AUTO                 ║
-║       No one can put out the stars !   ║
+║            WEB/APP UI-AUTO             ║
 ══════════════════════════════════════════
 """
 
@@ -106,10 +102,12 @@ class RunPytest:
     def receiving_argv(cls):
         """
         接收系统输入参数   1模块名称 2线程数据 3失败重跑次数 4生成结果目录名称  Python run.py all 1 1 demo
+        接收命令行参数
         :return:
         """
-        # 1模块名称
+
         try:
+            # 1模块名称
             module_name = sys.argv[1]
             mlist = None
             if ',' in module_name:
@@ -205,9 +203,9 @@ class RunPytest:
 
         # 执行前检查是否清除报告
         DelReport().run_del_report()
-
+        # -m=标签名：执行被 @pytest.mark.标签名 标记的用例。
         pytest.main(
-            ['-m', 'testbaidu_web', '-n=1', '--reruns=0', '--alluredir', f'{PRPORE_JSON_DIR}', f'{CASE_DIR}'])
+            ['-m', 'testbaidu_web_auto', '-n=1', '--reruns=0', '--alluredir', f'{PRPORE_JSON_DIR}', f'{CASE_DIR}'])
 
         #生成测试报告
         os.system(f'allure generate {PRPORE_JSON_DIR} -o {PRPORE_ALLURE_DIR} --clean')

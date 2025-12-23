@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @File: mail.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2022/2/22  13:59
 
 import os
 import smtplib

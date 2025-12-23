@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @File: message_notice.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2022/2/23  10:52
 
 from typing import TypeVar
 

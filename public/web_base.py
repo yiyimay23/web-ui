@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-# @File: selenium_driver.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2020/11/4  14:40
+# @File:web_base.py
 
 import os
 import sys
@@ -18,6 +15,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 from config import PRPORE_SCREEN_DIR
 from public.common import ErrorExcep, logger, is_assertion, reda_conf
@@ -27,8 +25,10 @@ EM = TypeVar('EM')  # 可以是任何类型。
 
 # 读取配置参数
 WEB_UI = reda_conf('WEB_UI')
-WEB_POLL_FREQUENCY = WEB_UI.get('WEB_WIMPLICITLY_WAIT_TIME')
-WEB_IMPLICITLY_WAIT_TIME = WEB_UI.get('WEB_POLL_FREQUENCY')
+# WEB_POLL_FREQUENCY = WEB_UI.get('WEB_WIMPLICITLY_WAIT_TIME')
+# WEB_IMPLICITLY_WAIT_TIME = WEB_UI.get('WEB_POLL_FREQUENCY')
+WEB_POLL_FREQUENCY = WEB_UI.get('WEB_POLL_FREQUENCY')
+WEB_IMPLICITLY_WAIT_TIME = WEB_UI.get('WEB_WIMPLICITLY_WAIT_TIME')
 
 # 读取配置参数
 APP_UI = reda_conf('APP_UI')
@@ -776,45 +776,94 @@ class Base:
         else:
             self.driver_element(types=types, locate=locate).send_keys(keys)
 
-    def driver_element(self, types: str, locate: str, el: str = None, ) -> EM or None:
+    # def driver_element(self, types: str, locate: str, el: str = None, ) -> EM or None:
+    #     """
+    #     返回 element
+    #     :param types: 定位类型
+    #     :param locate: 定位元素
+    #     :param el: 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
+    #     :return: driver 对象
+    #     """
+    #     types = self.get_by_type(types)
+    #
+    #     if el is not None:  # find_elements
+    #         element = WebDriverWait(self.driver, timeout=IMPLICITLY_WAIT_TIME,
+    #                                 poll_frequency=POLL_FREQUENCY).until(
+    #             lambda x: x.find_elements(types, locate))
+    #         return element
+    #     else:  # find_element
+    #         element = WebDriverWait(self.driver, timeout=IMPLICITLY_WAIT_TIME,
+    #                                 poll_frequency=POLL_FREQUENCY).until(
+    #             lambda x: x.find_element(types, locate))
+    #         return element
+    def driver_element(self, types: str, locate: str, el: str = None):
         """
-        返回 element
-        :param types: 定位类型
-        :param locate: 定位元素
-        :param el: 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
-        :return: driver 对象
+        只负责查找元素，不关心是否可点击/可输入
+        el != None : 查找多个元素
+        el == None : 查找单个元素
         """
-        types = self.get_by_type(types)
 
-        if el is not None:  # find_elements
-            element = WebDriverWait(self.driver, timeout=IMPLICITLY_WAIT_TIME,
-                                    poll_frequency=POLL_FREQUENCY).until(
-                lambda x: x.find_elements(types, locate))
-            return element
-        else:  # find_element
-            element = WebDriverWait(self.driver, timeout=IMPLICITLY_WAIT_TIME,
-                                    poll_frequency=POLL_FREQUENCY).until(
-                lambda x: x.find_element(types, locate))
-            return element
+        if self.driver is None:
+            raise RuntimeError("WebDriver 未初始化")
 
+        by = self.get_by_type(types)
+
+        wait = WebDriverWait(
+            self.driver,
+            timeout=IMPLICITLY_WAIT_TIME,
+            poll_frequency=POLL_FREQUENCY
+        )
+
+        # 多元素
+        if el is not None:
+            return wait.until(
+                EC.presence_of_all_elements_located((by, locate))
+            )
+
+        # 单元素
+        return wait.until(
+            EC.presence_of_element_located((by, locate))
+        )
+
+    # def web_submit(self, types: str, locate: str, index: int = None) -> None:
+    #     """
+    #     获取元素后  提交 * 前提是input元素的type为submit
+    #     :param types: 定位类型
+    #     :param locate: 定位元素
+    #     :param index: 列表索引位置  find_element传递时 此值必填
+    #     :return:
+    #     """
+    #     el = None  # 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
+    #     if index is not None:
+    #         el = 'l'
+    #     logger.debug('提交操作')
+    #     if el is not None and index is not None:
+    #         # 多个定位定位 利用index 列表索引点击
+    #         self.driver_element(types=types, locate=locate, el=el)[index].submit()
+    #     else:
+    #         # 单个定位点击
+    #         self.driver_element(types=types, locate=locate).submit()
     def web_submit(self, types: str, locate: str, index: int = None) -> None:
-        """
-        获取元素后  提交 * 前提是input元素的type为submit
-        :param types: 定位类型
-        :param locate: 定位元素
-        :param index: 列表索引位置  find_element传递时 此值必填
-        :return:
-        """
-        el = None  # 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
-        if index is not None:
-            el = 'l'
+        by = self.get_by_type(types)
         logger.debug('提交操作')
-        if el is not None and index is not None:
-            # 多个定位定位 利用index 列表索引点击
-            self.driver_element(types=types, locate=locate, el=el)[index].submit()
+
+        wait = WebDriverWait(
+            self.driver,
+            timeout=IMPLICITLY_WAIT_TIME,
+            poll_frequency=POLL_FREQUENCY
+        )
+
+        if index is not None:
+            elements = wait.until(
+                EC.presence_of_all_elements_located((by, locate))
+            )
+            wait.until(lambda d: elements[index].is_enabled())
+            elements[index].submit()
         else:
-            # 单个定位点击
-            self.driver_element(types=types, locate=locate).submit()
+            element = wait.until(
+                EC.element_to_be_clickable((by, locate))
+            )
+            element.submit()
 
     def web_right_click(self, types: str, locate: str, index: int = None) -> None:
         """
@@ -916,42 +965,86 @@ class Base:
             # 单个定位提取文本元素必须是唯一 如果多个时默认返回第一个
             return self.driver_element(types=types, locate=locate).text
 
+    # def often_click(self, types: str, locate: str, index: int = None) -> None:
+    #     """
+    #     获取元素后  点击
+    #     :param types: 定位类型
+    #     :param locate: 定位元素
+    #     :param index: 列表索引位置  find_element传递时 此值必填
+    #     :return:
+    #     """
+    #     el = None  # 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
+    #     if index is not None:
+    #         el = 'l'
+    #     logger.debug('点击操作')
+    #     if el is not None and index is not None:
+    #         # 多个定位定位 利用index 列表索引点击
+    #         self.driver_element(types=types, locate=locate, el=el)[index].click()
+    #     else:
+    #         # 单个定位点击
+    #         self.driver_element(types=types, locate=locate).click()
     def often_click(self, types: str, locate: str, index: int = None) -> None:
-        """
-        获取元素后  点击
-        :param types: 定位类型
-        :param locate: 定位元素
-        :param index: 列表索引位置  find_element传递时 此值必填
-        :return:
-        """
-        el = None  # 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
-        if index is not None:
-            el = 'l'
+        by = self.get_by_type(types)
         logger.debug('点击操作')
-        if el is not None and index is not None:
-            # 多个定位定位 利用index 列表索引点击
-            self.driver_element(types=types, locate=locate, el=el)[index].click()
-        else:
-            # 单个定位点击
-            self.driver_element(types=types, locate=locate).click()
 
-    def often_input(self, types: str, locate: str, text: str, index: int = None) -> None:
-        """
-        获取元素后输入 并支持键盘操作
-        :param types: 定位类型
-        :param locate:  定位元素或者 表达式
-        :param text:  输入内容
-        :param index: 列表索引位置  find_element传递时 此值必填
-        :return:
-        """
-        el = None  # 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
+        wait = WebDriverWait(
+            self.driver,
+            timeout=IMPLICITLY_WAIT_TIME,
+            poll_frequency=POLL_FREQUENCY
+        )
+
         if index is not None:
-            el = 'l'
-        logger.debug('输入操作')
-        if el is not None and index is not None:
-            self.driver_element(types=types, locate=locate, el=el)[index].send_keys(text)
+            elements = wait.until(
+                EC.presence_of_all_elements_located((by, locate))
+            )
+            wait.until(lambda d: elements[index].is_displayed())
+            elements[index].click()
         else:
-            self.driver_element(types=types, locate=locate, ).send_keys(text)
+            element = wait.until(
+                EC.element_to_be_clickable((by, locate))
+            )
+            element.click()
+
+    # def often_input(self, types: str, locate: str, text: str, index: int = None) -> None:
+    #     """
+    #     获取元素后输入 并支持键盘操作
+    #     :param types: 定位类型
+    #     :param locate:  定位元素或者 表达式
+    #     :param text:  输入内容
+    #     :param index: 列表索引位置  find_element传递时 此值必填
+    #     :return:
+    #     """
+    #     el = None  # 单个/多个  默认 find_element=None 单个  / 如果 find_element = 's' 多个
+    #     if index is not None:
+    #         el = 'l'
+    #     logger.debug('输入操作')
+    #     if el is not None and index is not None:
+    #         self.driver_element(types=types, locate=locate, el=el)[index].send_keys(text)
+    #     else:
+    #         self.driver_element(types=types, locate=locate, ).send_keys(text)
+    def often_input(self, types: str, locate: str, text: str, index: int = None) -> None:
+        by = self.get_by_type(types)
+        logger.debug('输入操作')
+
+        wait = WebDriverWait(
+            self.driver,
+            timeout=IMPLICITLY_WAIT_TIME,
+            poll_frequency=POLL_FREQUENCY
+        )
+
+        if index is not None:
+            elements = wait.until(
+                EC.presence_of_all_elements_located((by, locate))
+            )
+            element = elements[index]
+            wait.until(lambda d: element.is_displayed())
+            element.send_keys(text)
+        else:
+            element = wait.until(
+                EC.visibility_of_element_located((by, locate))
+            )
+            element.send_keys(text)
+
 
     def often_clear(self, types: str, locate: str, index: int = None) -> None:
         """
@@ -1156,7 +1249,50 @@ class AutoRunCase(Web):
     自动执行测试用列
     """
 
-    def run(self, yamlfile, case, test_date=None, forwait=None):
+    # def run(self, yamlfile, case, test_date=None, forwait=None):
+    #     """
+    #     自动执行定位步骤  使用run 函数时 test_date 直接传递为可迭代对象
+    #     :param yamlfile:  yaml文件
+    #     :param case: yaml定位用例
+    #     :param test_date:  测试数据
+    #     :param forwait:  多步骤循环等待 /s
+    #     :return:
+    #     """
+    #
+    #     relust = None
+    #
+    #     yaml = replace_py_yaml(yamlfile)
+    #
+    #     locator_data = self.get_case(yaml, case)
+    #     test_dict = locator_data.test_data()
+    #
+    #     locator_step = locator_data.stepCount()
+    #
+    #     for locator in range(locator_step):
+    #         waits = locator_data.locawait(locator)
+    #         if locator_data.operate(locator) in ('input', 'clear_continue_input', 'jsclear_continue_input'):
+    #
+    #             self.web_judge_execution(types=locator_data.types(locator), locate=locator_data.locate(locator),
+    #                                      operate=locator_data.operate(locator), notes=locator_data.info(locator),
+    #                                      text=test_date[locator], index=locator_data.listindex(locator),
+    #                                      wait=locator_data.locawait(locator))
+    #         else:
+    #             relust = self.web_judge_execution(types=locator_data.types(locator),
+    #                                               locate=locator_data.locate(locator),
+    #                                               operate=locator_data.operate(locator),
+    #                                               notes=locator_data.info(locator),
+    #                                               index=locator_data.listindex(locator),
+    #                                               wait=locator_data.locawait(locator))
+    #         if waits is not None:
+    #             forwait = waits
+    #
+    #         self.sleep(forwait)
+    #
+    #     # 断言函数
+    #     if ('assertion' and 'assertype') in test_dict[0] and relust:  # 有断言需求并且有实际值才进行断言
+    #         is_assertion(test_date, relust)
+    #     # return relust
+    def run(self, yamlfile, case, test_date=None):
         """
         自动执行定位步骤  使用run 函数时 test_date 直接传递为可迭代对象
         :param yamlfile:  yaml文件
@@ -1176,26 +1312,141 @@ class AutoRunCase(Web):
         locator_step = locator_data.stepCount()
 
         for locator in range(locator_step):
-            waits = locator_data.locawait(locator)
-            if locator_data.operate(locator) in ('input', 'clear_continue_input', 'jsclear_continue_input'):
+            wait_conf = locator_data.locawait(locator)
+            step_info = locator_data.info(locator)
 
-                self.web_judge_execution(types=locator_data.types(locator), locate=locator_data.locate(locator),
-                                         operate=locator_data.operate(locator), notes=locator_data.info(locator),
-                                         text=test_date[locator], index=locator_data.listindex(locator),
-                                         wait=locator_data.locawait(locator))
+            if locator_data.operate(locator) in (
+                    'input', 'clear_continue_input', 'jsclear_continue_input'
+            ):
+                self.web_judge_execution(
+                    types=locator_data.types(locator),
+                    locate=locator_data.locate(locator),
+                    operate=locator_data.operate(locator),
+                    notes=step_info,
+                    text=test_date[locator],
+                    index=locator_data.listindex(locator),
+                    wait=wait_conf
+                )
             else:
-                relust = self.web_judge_execution(types=locator_data.types(locator),
-                                                  locate=locator_data.locate(locator),
-                                                  operate=locator_data.operate(locator),
-                                                  notes=locator_data.info(locator),
-                                                  index=locator_data.listindex(locator),
-                                                  wait=locator_data.locawait(locator))
-            if waits is not None:
-                forwait = waits
+                relust = self.web_judge_execution(
+                    types=locator_data.types(locator),
+                    locate=locator_data.locate(locator),
+                    operate=locator_data.operate(locator),
+                    notes=step_info,
+                    index=locator_data.listindex(locator),
+                    wait=wait_conf
+                )
 
-            self.sleep(forwait)
-
+            # ⭐ 核心：统一 wait（零 sleep）
+            self.execute_wait(
+                types=locator_data.types(locator),
+                locate=locator_data.locate(locator),
+                wait_conf=wait_conf,
+                step_info=step_info
+            )
         # 断言函数
-        if ('assertion' and 'assertype') in test_dict[0] and relust:  # 有断言需求并且有实际值才进行断言
-            is_assertion(test_date, relust)
-        # return relust
+        # if ('assertion' and 'assertype') in test_dict[0] and relust:  # 有断言需求并且有实际值才进行断言
+        #     is_assertion(test_date, relust)
+        if (
+                'assertion' in test_dict[0]
+                and 'assertype' in test_dict[0]
+                and relust
+        ):
+            is_assertion(test_dict[0], relust)
+
+
+    def execute_wait(self, *, types=None, locate=None, wait_conf=None, step_info=""):
+        """
+        统一 wait 执行入口（零 sleep）
+
+        :param types: 定位类型（id/xpath/css/...）
+        :param locate: 定位表达式
+        :param wait_conf: yaml 中的 wait 配置（dict）
+        :param step_info: 当前步骤说明（用于报错提示）
+        """
+        # 白名单
+        ALLOWED_WAIT_TYPES = {
+            "presence",  # 元素存在于 DOM
+            "visible",  # 元素可见
+            "clickable",  # 元素可点击
+            "page_ready",  # document.readyState == complete
+            "url_change",  # url 发生变化
+        }
+        # ===== 1. 无 wait，直接返回 =====
+        if not wait_conf:
+            return
+
+        # ===== 2. wait 类型校验 =====
+        if not isinstance(wait_conf, dict):
+            raise ValueError(
+                f"[WAIT 配置错误] step={step_info}, wait 必须是 dict，当前={wait_conf}"
+            )
+
+        wait_type = wait_conf.get("type")
+        timeout = wait_conf.get("timeout")
+
+        if not wait_type or timeout is None:
+            raise ValueError(
+                f"[WAIT 配置缺失] step={step_info}, 必须包含 type / timeout，当前={wait_conf}"
+            )
+
+        if not isinstance(timeout, (int, float)) or timeout <= 0:
+            raise ValueError(
+                f"[WAIT timeout 非法] step={step_info}, timeout 必须是正数，当前={timeout}"
+            )
+
+        if wait_type not in ALLOWED_WAIT_TYPES:
+            raise ValueError(
+                f"[WAIT 非法类型] step={step_info}, type={wait_type}, "
+                f"允许值={ALLOWED_WAIT_TYPES}"
+            )
+
+        # ===== 3. 元素类 wait 参数校验 =====
+        if wait_type in ("presence", "visible", "clickable"):
+            if not types or not locate:
+                raise ValueError(
+                    f"[WAIT 参数错误] step={step_info}, "
+                    f"元素类 wait 需要 types + locate"
+                )
+
+        wait = WebDriverWait(self.driver, timeout)
+
+        # ===== 4. 执行 wait =====
+        try:
+            # -------- 页面级 wait --------
+            if wait_type == "page_ready":
+                wait.until(
+                    lambda d: d.execute_script("return document.readyState") == "complete"
+                )
+
+            elif wait_type == "url_change":
+                old_url = self.driver.current_url
+                wait.until(lambda d: d.current_url != old_url)
+
+            # -------- 元素级 wait --------
+            else:
+                by = self.get_by_type(types)
+
+                if wait_type == "presence":
+                    wait.until(EC.presence_of_element_located((by, locate)))
+
+                elif wait_type == "visible":
+                    wait.until(EC.visibility_of_element_located((by, locate)))
+
+                elif wait_type == "clickable":
+                    wait.until(EC.element_to_be_clickable((by, locate)))
+
+        except TimeoutException:
+            # ===== 5. 统一 Timeout 报错 =====
+            raise TimeoutException(
+                f"[WAIT 超时] step={step_info}, type={wait_type}, timeout={timeout}, "
+                f"locator={types}={locate}"
+            )
+
+
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.common.exceptions import TimeoutException
+
+
+

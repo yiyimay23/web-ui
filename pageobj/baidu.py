@@ -1,27 +1,17 @@
 # -*- coding: utf-8 -*-
-# @File: login.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2020/10/22  16:21
+# @File: baidu.py
 
 import os
 import sys
-
 sys.path.append(os.pardir)
-
 from public import Web
 
-
-
-
 '''
-
 pageobj  对应 locatorYAML 操作页面
 '''
 
 
 class BaiDu(Web):
-
 
     def input_search_content(self, content):
         """
@@ -41,10 +31,4 @@ class BaiDu(Web):
         点击百度一下
         :return:
         """
-
         self.webexe(__file__, sys._getframe().f_code.co_name,)
-
-
-
-
-

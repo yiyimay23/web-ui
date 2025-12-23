@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 # @File: login.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2020/10/22  16:21
 
 import os
 import sys
 
 sys.path.append(os.pardir)
 
-
 from public import Web
-
 
 
 '''
@@ -21,7 +16,6 @@ pageobj  对应 locatorYAML 操作页面
 
 
 class WangYi(Web):
-
 
     def froms(self):    # 如果需要跳转回来 使用switch_default_content
         """

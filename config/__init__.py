@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # @File: __init__.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2021/2/5  14:29
+
 import os
+
+# 定义了模块的公共接口
+# 当使用 from module import * 时，只有这里列出的变量会被导入
 
 __all__ = ['BASE_DIR', 'LUINX_CHROMEDRIVER', 'LUINX_FIREFOXDRIVER', 'IE_PATH', 'WIN_CHROMEDRIVER',
            'WIN_FIREFOXDRIVER', 'MAC_CHROMEDRIVER', 'MAC_FIREFOXDRIVER', 'LOG_DIR', 'CASE_DIR',
@@ -13,7 +14,7 @@ __all__ = ['BASE_DIR', 'LUINX_CHROMEDRIVER', 'LUINX_FIREFOXDRIVER', 'IE_PATH', '
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-######### 浏览器驱动 参数配置 ######## 可用绝对路劲  LUINX_CHROMEDRIVER='/use/bin/chromedriver'  线上建议
+######### 浏览器驱动 参数配置 ######## 可用绝对路径  LUINX_CHROMEDRIVER='/use/bin/chromedriver'  线上建议
 # LUINX 系统浏览器驱动路劲
 LUINX_CHROMEDRIVER = os.path.join(BASE_DIR, "driver", "linux", "chromedriver")  # 谷歌浏览器
 LUINX_FIREFOXDRIVER = os.path.join(BASE_DIR, "driver", "linux", "geckodriver")  # 火狐浏览器

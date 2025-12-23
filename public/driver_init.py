@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-# @File: base_init.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2021/3/18  18:13
+
 import sys
 from typing import TypeVar
 
@@ -13,6 +10,7 @@ import os, time
 import requests
 
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from appium import webdriver as appbdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
@@ -269,7 +267,9 @@ class WebInit:
                         return self.browaer_setup_args(driver)
 
                     if self.browser == 'chrome':
-                        driver = webdriver.Chrome(executable_path=WIN_CHROMEDRIVER)
+                        # driver = webdriver.Chrome(executable_path=WIN_CHROMEDRIVER)
+                        service = Service(WIN_CHROMEDRIVER)
+                        driver = webdriver.Chrome(service=service)
                         return self.browaer_setup_args(driver)
 
                     elif self.browser == 'firefox':
@@ -283,7 +283,7 @@ class WebInit:
                     logger.error(f'当前{current_sys}系统不支持！')
 
             else:
-                logger.error('项目地址地址请求异常！！！')
+                logger.error('项目地址请求异常！！！')
 
 
         except SessionNotCreatedException:

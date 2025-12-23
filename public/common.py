@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @File: common.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2021/2/1  16:11
 
 import os
 import re
@@ -466,3 +462,34 @@ class ImgDiff:
 # if __name__ == '__main__':
 #     l=reda_conf('CURRENCY').get('LEVEL')
 #     print(l)
+
+
+def is_assertion(test_data: dict, actual_value: str):
+    """
+    执行 YAML 定义的断言
+    """
+
+    expected = test_data.get("assertion")
+    assert_type = test_data.get("assertype")
+
+    if expected is None or assert_type is None:
+        raise ValueError("断言配置不完整")
+
+    if assert_type == "==":
+        assert actual_value == expected, \
+            f"[断言失败] 期望={expected}, 实际={actual_value}"
+
+    elif assert_type == "!=":
+        assert actual_value != expected, \
+            f"[断言失败] 期望≠{expected}, 实际={actual_value}"
+
+    elif assert_type == "in":
+        assert expected in actual_value, \
+            f"[断言失败] 期望包含={expected}"
+
+    elif assert_type == "notin":
+        assert expected not in actual_value, \
+            f"[断言失败] 期望不包含={expected}"
+
+    else:
+        raise ValueError(f"不支持的断言类型: {assert_type}")

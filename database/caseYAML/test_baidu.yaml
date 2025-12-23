@@ -5,8 +5,20 @@
   precond:        # 前置说明
   testdata: # 测试数据 /列表
     - content: python
+      assertion: "python"             # *断言时必填
+      assertype: 'in'                # 断言参数填写时此必填类型  ==(等于) !=(不等于) in(包含) notin(不包含)
     - content: java
+      assertion: "java"             # *断言时必填
+      assertype: 'in'                # 断言参数填写时此必填类型  ==(等于) !=(不等于) in(包含) notin(不包含)
     - content: c++
+      assertion: "c++"             # *断言时必填
+      assertype: 'in'                # 断言参数填写时此必填类型  ==(等于) !=(不等于) in(包含) notin(不包含)
     - content: go
+      assertion: "go"             # *断言时必填
+      assertype: 'in'                # 断言参数填写时此必填类型  ==(等于) !=(不等于) in(包含) notin(不包含)
     - content: shell
+      assertion: "shell"             # *断言时必填
+      assertype: 'in'                # 断言参数填写时此必填类型  ==(等于) !=(不等于) in(包含) notin(不包含)
     - content: c#
+      assertion: "c#"             # *断言时必填
+      assertype: 'in'                # 断言参数填写时此必填类型  ==(等于) !=(不等于) in(包含) notin(不包含)

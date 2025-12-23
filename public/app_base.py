@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-# @File: appbase.py
-# @Author: HanWenLu
-# @E-mail: wenlupay@163.com
-# @Time: 2021/3/18  18:16
-
 
 import time
 from typing import TypeVar, Optional, Callable
 
-from appium.webdriver.common.touch_action import TouchAction
+# from appium.webdriver.common.touch_action import TouchAction  //较新版本>4， TouchAction模块已被重构或移除
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.actions import interaction
+from selenium.webdriver.common.actions.action_builder import ActionBuilder
+from selenium.webdriver.common.actions.pointer_input import PointerInput
+
 
 from public.common import ErrorExcep, logger, reda_conf
 from public.reda_data import replace_py_yaml
@@ -113,9 +113,11 @@ class AppBase(Base):
         :return:
         """
         logger.debug('点击app')
-        act = TouchAction(self.driver)
-
-        act.tap(element=element, x=x, y=y).perform()
+        # 修改前
+        # ct = TouchAction(self.driver)
+        # act.tap(element=element, x=x, y=y).perform()
+        # 修改后
+        ActionChains(self.driver).move_to_element_with_offset(to_element=element, xoffset=x, yoffset=y).click().perform()
 
     def app_press_s(self, element: str = None, x: Optional[int] = None, y: Optional[int] = None, s: int = 0.1) -> None:
         """
@@ -127,8 +129,52 @@ class AppBase(Base):
         :return:
         """
         logger.debug(f'app按下指定秒数{s}')
-        pre = TouchAction(self.driver)
-        pre.long_press(el=element, x=x, y=y, duration=s * 1000).perform()
+        # 修改前
+        # pre = TouchAction(self.driver)
+        # pre.long_press(el=element, x=x, y=y, duration=s * 1000).perform()
+        # 修改后
+        ActionChains(self.driver).move_to_element_with_offset(to_element=element, xoffset=x, yoffset=y).click_and_hold().pause(s).release().perform()
+
+
+    #  滑动操作，从右到左，封装成函数
+    def w3c_swipe(self, start_el=None, start_x=0, start_y=0,
+                  end_el=None, end_x=0, end_y=0, duration_ms=1000):
+        """
+        使用W3C Actions API执行滑动操作
+
+        Args:
+            start_el: 起点元素（可选）
+            start_x: 起点X坐标（如果start_el提供，则是相对偏移；否则是绝对坐标）
+            start_y: 起点Y坐标
+            end_el: 终点元素（可选）
+            end_x: 终点X坐标
+            end_y: 终点Y坐标
+            duration_ms: 滑动持续时间（毫秒）
+        """
+
+        # 计算绝对坐标
+        def get_absolute_coordinates(element, offset_x, offset_y):
+            if element:
+                location = element.location
+                return location['x'] + offset_x, location['y'] + offset_y
+            return offset_x, offset_y
+
+        # 获取起点和终点的绝对坐标
+        abs_start_x, abs_start_y = get_absolute_coordinates(start_el, start_x, start_y)
+        abs_end_x, abs_end_y = get_absolute_coordinates(end_el, end_x, end_y)
+
+        # 创建指针设备
+        pointer = PointerInput(interaction.POINTER_TOUCH, "finger")
+        actions = ActionBuilder(self.driver, mouse=pointer)
+
+        # 构建动作链
+        actions.pointer_action.move_to_location(abs_start_x, abs_start_y)
+        actions.pointer_action.pointer_down()
+        actions.pointer_action.pause(duration_ms / 1000)  # 转换为秒
+        actions.pointer_action.move_to_location(abs_end_x, abs_end_y)
+        actions.pointer_action.pointer_up()
+        actions.perform()
+
 
     def app_right_to_left_move_to(self, press_el: str = None, press_x: Optional[int] = 0, press_y: Optional[int] = 0,
                                   mo_el: str = None, mo_x: Optional[int] = 0, mo_y: Optional[int] = 0) -> None:
@@ -143,11 +189,23 @@ class AppBase(Base):
         :return:
         """
         logger.debug('从右到左')
-        right_to_left = TouchAction(self.driver)
-        (right_to_left
-         .press(press_el, x=press_x, y=press_y)
-         .wait(1000).move_to(mo_el, x=mo_x, y=mo_y)
-         .release().perform())
+        # 修改前
+        # right_to_left = TouchAction(self.driver)
+        # (right_to_left
+        #  .press(press_el, x=press_x, y=press_y)
+        #  .wait(1000).move_to(mo_el, x=mo_x, y=mo_y)
+        #  .release().perform())
+        # 修改后
+        self.w3c_swipe(
+            start_el=press_el,
+            start_x=press_x,
+            start_y=press_y,
+            end_el=mo_el,
+            end_x=mo_x,
+            end_y=mo_y,
+            duration_ms=1000
+        )
+
 
     def swipe_left(self, swipe_times: int = 1) -> None:
         """

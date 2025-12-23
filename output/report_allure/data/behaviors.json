@@ -1,47 +1,5 @@
 {
   "uid" : "b1a8273437954620fa374b796ffaacdd",
   "name" : "behaviors",
-  "children" : [ {
-    "name" : "百度搜索",
-    "children" : [ {
-      "name" : "所搜验证",
-      "children" : [ {
-        "name" : "输入内容并搜索",
-        "uid" : "662d45d1f89de685",
-        "parentUid" : "2249c6438e61b861cc328111dda6595b",
-        "status" : "failed",
-        "time" : {
-          "start" : 1654832760384,
-          "stop" : 1654832764572,
-          "duration" : 4188
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "('python', 'python', 'in')" ]
-      }, {
-        "name" : "输入内容并搜索",
-        "uid" : "82f8a86eb936c970",
-        "parentUid" : "2249c6438e61b861cc328111dda6595b",
-        "status" : "failed",
-        "time" : {
-          "start" : 1654832769000,
-          "stop" : 1654832772961,
-          "duration" : 3961
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "('C++', 'C++', 'in')" ]
-      } ],
-      "uid" : "2249c6438e61b861cc328111dda6595b"
-    } ],
-    "uid" : "a76e3034c0bacf1f726844fd54aff2b5"
-  } ]
+  "children" : [ ]
 }
