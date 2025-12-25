@@ -555,65 +555,6 @@ class ImgDiff:
 # from selenium.common.exceptions import TimeoutException
 
 
-# def is_assertion(
-#     test_data: dict,
-#     actual_value_func,
-#     driver,
-#     timeout: int = 5
-# ):
-#     """
-#     执行 YAML 定义的断言（稳定版）
-#     :param test_data: YAML 中的断言配置
-#     :param actual_value_func: 一个可调用对象，用于动态获取 actual_value
-#     :param driver: WebDriver
-#     :param timeout: 等待超时时间
-#     """
-#
-#     expected = test_data.get("assertion")
-#     assert_type = test_data.get("assertype")
-#
-#     if expected is None or assert_type is None:
-#         raise ValueError("断言配置不完整")
-#
-#     # ========= 瞬时断言（无需等待） =========
-#     if assert_type == "==":
-#         actual_value = actual_value_func()
-#         assert actual_value == expected, \
-#             f"[断言失败] 期望={expected}, 实际={actual_value}"
-#
-#     elif assert_type == "!=":
-#         actual_value = actual_value_func()
-#         assert actual_value != expected, \
-#             f"[断言失败] 期望≠{expected}, 实际={actual_value}"
-#
-#     # ========= 等待型断言（核心改造点） =========
-#     elif assert_type in ("in", "notin"):
-#         last_actual = None
-#
-#         def _cond(_):
-#             nonlocal last_actual
-#             last_actual = actual_value_func()
-#             if not last_actual:
-#                 return False
-#
-#             if assert_type == "in":
-#                 return expected in last_actual
-#             else:
-#                 return expected not in last_actual
-#
-#         try:
-#             WebDriverWait(driver, timeout).until(_cond)
-#         except TimeoutException:
-#             raise AssertionError(
-#                 f"[断言失败]\n"
-#                 f"断言类型: {assert_type}\n"
-#                 f"期望值: {expected}\n"
-#                 f"等待时间: {timeout}s\n"
-#                 f"实际内容: {last_actual}"
-#             )
-#
-#     else:
-#         raise ValueError(f"不支持的断言类型: {assert_type}")
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 

@@ -139,7 +139,7 @@ class SendEMail:
     def send_img(self, subject: str, content, filename: str, content_type: str = 'html'):
         '''
         发送带图片的邮件
-        :param to_user: 对方邮箱
+        # :param to_user: 对方邮箱
         :param subject: 邮件主题
         :param content: 邮件正文
         :param filename: 图片路径

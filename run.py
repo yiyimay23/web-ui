@@ -93,6 +93,57 @@ class RunPytest:
 
         return PRPORE_JSON_DIR, PRPORE_ALLURE_DIR
 
+    # 选择发送消息的平台
+    @classmethod
+    def send_notice(
+            content: str,
+            platform: str = "false",  # "w", "d", "a"，“false”
+            mobile_list: list = None,
+            is_at_all: bool = False,
+            content_prefix: str = ""
+    ) -> bool:
+        """
+        简化版统一发送通知
+
+        Args:
+            content: 消息内容
+            platform: 平台类型
+            mobile_list: @的手机号列表
+            is_at_all: 是否@所有人
+            content_prefix: 内容前缀
+
+        Returns:
+            bool: 是否至少一个平台发送成功
+        """
+        if platform.lower() == "false":
+            return False
+
+        full_content = f"{content_prefix}{content}" if content_prefix else content
+        success = False
+
+        # 发送企业微信
+        if platform.lower() in ["e", "a"]:
+            wechat_mobiles = mobile_list or []
+            if is_at_all and '@all' not in wechat_mobiles:
+                wechat_mobiles.append('@all')
+
+            try:
+                EnterpriseWeChatNotice.send_txt(full_content, wechat_mobiles)
+                success = True
+            except Exception as e:
+                logger.error(f"企业微信发送失败: {e}")
+
+        # 发送钉钉
+        if platform.lower() in ["d", "a"]:
+            try:
+                DingDingNotice.send_txt(full_content, mobile_list or [], is_at_all)
+                success = True
+            except Exception as e:
+                logger.error(f"钉钉发送失败: {e}")
+
+        return success
+
+
     # @classmethod
     # def receiving_argv(cls):
     #     """
@@ -132,72 +183,6 @@ class RunPytest:
     #         logger.error(e)
     #         raise ErrorExcep('输入参数错误！')
 
-    # @classmethod
-    # def receiving_argv(cls):
-    #     """
-    #     接收命令行参数，支持：
-    #     - 命令行运行
-    #     - PyCharm 直接运行（使用默认值）
-    #     接收系统输入参数   1模块名称 2线程数据 3失败重跑次数 4生成结果目录名称  Python run.py all 1 1 demo
-    #     接收命令行参数
-    #     """
-    #
-    #     argv = sys.argv
-    #
-    #     # ===== 默认值（debug / IDE）=====
-    #     # 生成结果目录名称
-    #     default_results_dir = "debug"
-    #     # 模块名称
-    #     default_module_name = None
-    #     # 默认不指定用例子集（跑全部）
-    #     default_mlist = None  # 不指定marker，默认执行全部用例
-    #     # 线程数据
-    #     default_thread_num = 1
-    #     # 失败重跑次数
-    #     default_reruns = 0
-    #     # 是否开启邮箱通知
-    #     default_is_email = "False"  # True、1 开启   False、0 不开
-    #     # 是否开启消息通知 企业微信或者钉钉
-    #     default_is_notice = "False"  # 传递参数 'w' 微信 ,'d' 钉钉 ,'a' 都通知
-    #
-    #     # ===== 命令行参数不足，走默认 =====
-    #     if len(argv) < 2:
-    #         logger.warning("未检测到命令行参数，使用默认 debug 参数")
-    #         return (
-    #             default_results_dir,
-    #             default_module_name,
-    #             default_mlist,
-    #             default_thread_num,
-    #             default_reruns,
-    #             default_is_email,
-    #             default_is_notice,
-    #         )
-    #
-    #     # ===== 正式解析参数 =====
-    #     try:
-    #         results_dir = argv[1]
-    #         module_name = argv[2]
-    #         mlist = argv[3]
-    #         thread_num = int(argv[4])
-    #         reruns = int(argv[5])
-    #         is_email = argv[6]
-    #         is_notice = argv[7]
-    #
-    #         return (
-    #             results_dir,
-    #             module_name,
-    #             mlist,
-    #             thread_num,
-    #             reruns,
-    #             is_email,
-    #             is_notice,
-    #         )
-    #
-    #     except Exception as e:
-    #         logger.error(f"命令行参数解析失败: {e}")
-    #         raise
-
-
 
     @staticmethod
     def receiving_argv():
@@ -207,8 +192,8 @@ class RunPytest:
 
         argv = sys.argv
 
-        # ===== 默认参数（⚠️ 非常重要）=====
-        results_dir = "debug"  # debug / prod
+        # ===== 默认参数(非常重要）=====
+        results_dir = "debug"  # debug / prod  调试/正式
         module_name = "testbaidu_web_auto"  # pytest -m
         mlist = []  # 预留
         thread_num = 1
@@ -248,7 +233,7 @@ class RunPytest:
             thread_num  : {thread_num}  # 线程数
             reruns      : {reruns}  # 失败重跑次数
             is_email    : {is_email}   # True、1 开启   False、0 不开 是否开启邮箱通知
-            is_notice   : {is_notice}  # 开启消息通知 # 传递参数 'w' 微信 ,'d' 钉钉 ,'a' 都通知
+            is_notice   : {is_notice}  # 开启消息通知 # 传递参数 'w' 企业微信 ,'d' 钉钉 ,'a' 都通知
             --------------------------------
             """
         )
@@ -313,13 +298,13 @@ class RunPytest:
         """
 
         (
-            results_dir,
-            module_name,
+            results_dir,  # 生成结果目录名称
+            module_name,  # 模块名称
             mlist,
-            thread_num,
-            reruns,
-            is_email,
-            is_notice
+            thread_num,  # 线程数
+            reruns,  # 失败重跑次数
+            is_email,  # True、1 开启   False、0 不开 是否开启邮箱通知
+            is_notice  # 开启消息通知 # 传递参数 'w' 微信 ,'d' 钉钉 ,'a' 都通知
         ) = cls.receiving_argv()
 
         # ===== 清理报告策略 =====
@@ -365,7 +350,8 @@ class RunPytest:
                 filename="test_report"
             )
 
-        cls.notice_type(is_notice, html_index)
+        # cls.notice_type(is_notice, html_index)  # 设置是发送企业微信还是钉钉，还是不发送
+        cls.send_notice(html_index, is_notice)  # 设置是发送企业微信还是钉钉，还是不发送,还是都发送
 
         return html_index
 
@@ -395,31 +381,7 @@ class RunPytest:
     #     #
     #     # logger.info('邮件推送完成')
 
-    # @staticmethod
-    # def run_debug():
-    #     # 运行前清理
-    #     DelReport().run_del_report(clean_results=True)
-    #
-    #     results_dir = "debug"
-    #     prpore_json_dir, prpore_allure_dir = RunPytest.output_path(results_dir)
-    #
-    #     # pytest.main([
-    #     #     '-m', 'testbaidu_web_auto',
-    #     #     '-n=1',
-    #     #     '--reruns=0',
-    #     #     '--alluredir', prpore_json_dir,
-    #     #     CASE_DIR
-    #     # ])
-    #     # 正式run 才启用-n
-    #     pytest.main([
-    #         '-m', 'testbaidu_web_auto',
-    #         '--alluredir', prpore_json_dir,
-    #         CASE_DIR
-    #     ])
-    #
-    #     os.system(f'allure generate "{prpore_json_dir}" -o "{prpore_allure_dir}" --clean')
-    #     # print("pytest alluredir =", prpore_json_dir)
-    #     logger.info('测试报告生成完成！')
+
     @staticmethod
     def run_debug():
         """
