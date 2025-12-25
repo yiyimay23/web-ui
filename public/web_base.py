@@ -6,7 +6,6 @@ import sys
 import time
 from enum import Enum
 from typing import TypeVar, Optional
-
 import allure
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.action_chains import ActionChains
@@ -16,7 +15,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
-
 from config import PRPORE_SCREEN_DIR
 from public.common import ErrorExcep, logger, is_assertion, reda_conf
 from public.reda_data import GetCaseYmal, replace_py_yaml
@@ -1298,7 +1296,7 @@ class AutoRunCase(Web):
         :param yamlfile:  yaml文件
         :param case: yaml定位用例
         :param test_date:  测试数据
-        :param forwait:  多步骤循环等待 /s
+        # :param forwait:  多步骤循环等待 /s
         :return:
         """
 
@@ -1352,7 +1350,21 @@ class AutoRunCase(Web):
                 and 'assertype' in test_dict[0]
                 and relust
         ):
-            is_assertion(test_dict[0], relust)
+            # is_assertion(test_dict[0], relust)
+
+            is_assertion(
+                test_dict[0],
+                actual_value_func=lambda: relust,
+                driver=self.driver
+            )
+
+            # 如果result是HTML或者文本(经验证，不好用)
+            # is_assertion(
+            #     test_dict[0],
+            #     actual_value_func=lambda: self.web_html_content(),
+            #     driver=self.driver
+            # )
+
 
 
     def execute_wait(self, *, types=None, locate=None, wait_conf=None, step_info=""):
@@ -1442,11 +1454,3 @@ class AutoRunCase(Web):
                 f"[WAIT 超时] step={step_info}, type={wait_type}, timeout={timeout}, "
                 f"locator={types}={locate}"
             )
-
-
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.common.exceptions import TimeoutException
-
-
-

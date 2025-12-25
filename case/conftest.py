@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # @File: conftest.py.py
-
 import pytest
-
 from public import WebInit, AppInit
 from public import reda_conf
 

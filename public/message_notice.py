@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-
+# @file:message_notice.py
 from typing import TypeVar
-
 import requests
-
-from public.common import logger,reda_conf
+from public.common import logger, reda_conf
 
 T = TypeVar('T')  # 可以是任何类型。
 

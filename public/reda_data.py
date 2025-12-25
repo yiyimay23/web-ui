@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
-
+# @file:reda_data.py
 import os
 import pickle
 from typing import List, Tuple
-
 import yaml
 from faker import Factory
 from xlrd import open_workbook
-
 from config import CASEYMAL_DIR, LOCATORYMAL_DIR
 from public.common import ErrorExcep, logger, reda_conf
 from public.db import RedisPool
 
 fake = Factory().create('zh_CN')
-
 
 
 # 读取Excel 数据
@@ -72,7 +69,7 @@ class RedaExcel:
 # 读取yaml数据
 class GetCaseYmal:
     """
-    步骤数据 locatorYaml
+     步骤数据 locatorYaml
      获取测试用例 locatorYaml数据类
     """
 

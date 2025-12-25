@@ -162,61 +162,118 @@ class SetLog:
 
 
 # 删除测试报告
+# class DelReport:
+#
+#     def mkdir(self, path: str) -> None:
+#         """
+#         文件夹不存在就创建
+#         :param path:
+#         :return:
+#         """
+#         folder = os.path.exists(path)
+#         if not folder:  # 判断是否存在文件夹如果不存在则创建为文件夹
+#             os.makedirs(path)
+#         else:
+#             pass
+#
+#     def clean_report(self, filepath: str) -> None:
+#         """
+#         清除测试报告文件
+#         :param filepath:  str  清除路径
+#         :return:
+#         """
+#         del_list = os.listdir(filepath)
+#         if del_list:
+#             try:
+#                 for f in del_list:
+#                     file_path = os.path.join(filepath, f)
+#
+#                     # 判断是不是文件
+#                     if os.path.isfile(file_path):
+#                         if not file_path.endswith('.xml'):  # 不删除.xml文件
+#                             os.remove(file_path)
+#                     else:
+#                         os.path.isdir(file_path)
+#                         shutil.rmtree(file_path)
+#             except Exception as e:
+#                 logger.error(e)
+#
+#     def run_del_report(self, ) -> None:
+#         """
+#         执行删除测试报告记录
+#         :return:
+#         """
+#         is_clean_report = reda_conf('CURRENCY').get('IS_CLEAN_REPORT')
+#         if is_clean_report == True:  # 如果为 True 清除 PRPORE_ALLURE_DIR、 PRPORE_JSON_DIR 、PRPORE_SCREEN_DIR 路径下报告
+#
+#             try:
+#                 dir_list = [PRPORE_ALLURE_DIR, PRPORE_JSON_DIR, PRPORE_SCREEN_DIR]
+#                 for dir in dir_list:
+#                     self.mkdir(dir)
+#                     self.clean_report(dir)
+#                 logger.info('清除测试报告中.....')
+#             except Exception as e:
+#                 logger.error(e)
+#
+#         else:
+#             logger.warning('清理报告未启用！！')
+
+
+# 删除报告
 class DelReport:
 
     def mkdir(self, path: str) -> None:
-        """
-        文件夹不存在就创建
-        :param path:
-        :return:
-        """
-        folder = os.path.exists(path)
-        if not folder:  # 判断是否存在文件夹如果不存在则创建为文件夹
+        if not os.path.exists(path):
             os.makedirs(path)
-        else:
-            pass
 
+    # def clean_report(self, filepath: str) -> None:
+    #     if not os.path.exists(filepath):
+    #         return
+    #
+    #     for f in os.listdir(filepath):
+    #         file_path = os.path.join(filepath, f)
+    #
+    #         try:
+    #             if os.path.isfile(file_path):
+    #                 if not file_path.endswith('.xml'):
+    #                     os.remove(file_path)
+    #             else:
+    #                 shutil.rmtree(file_path)
+    #         except Exception as e:
+    #             logger.error(e)
     def clean_report(self, filepath: str) -> None:
-        """
-        清除测试报告文件
-        :param filepath:  str  清除路径
-        :return:
-        """
-        del_list = os.listdir(filepath)
-        if del_list:
-            try:
-                for f in del_list:
-                    file_path = os.path.join(filepath, f)
+        if os.path.exists(filepath):
+            shutil.rmtree(filepath)
+        os.makedirs(filepath, exist_ok=True)
 
-                    # 判断是不是文件
-                    if os.path.isfile(file_path):
-                        if not file_path.endswith('.xml'):  # 不删除.xml文件
-                            os.remove(file_path)
-                    else:
-                        os.path.isdir(file_path)
-                        shutil.rmtree(file_path)
-            except Exception as e:
-                logger.error(e)
+    def run_del_report(self, *, clean_results: bool = False) -> None:
+        """
+        :param clean_results: 是否清 allure-results（默认 False）
+        """
 
-    def run_del_report(self, ) -> None:
-        """
-        执行删除测试报告记录
-        :return:
-        """
         is_clean_report = reda_conf('CURRENCY').get('IS_CLEAN_REPORT')
-        if is_clean_report == True:  # 如果为 True 清除 PRPORE_ALLURE_DIR、 PRPORE_JSON_DIR 、PRPORE_SCREEN_DIR 路径下报告
-
-            try:
-                dir_list = [PRPORE_ALLURE_DIR, PRPORE_JSON_DIR, PRPORE_SCREEN_DIR]
-                for dir in dir_list:
-                    self.mkdir(dir)
-                    self.clean_report(dir)
-                logger.info('清除测试报告中.....')
-            except Exception as e:
-                logger.error(e)
-
-        else:
+        if not is_clean_report:
             logger.warning('清理报告未启用！！')
+            return
+
+        try:
+            # 永远可以清 report_allure
+            self.mkdir(PRPORE_ALLURE_DIR)
+            self.clean_report(PRPORE_ALLURE_DIR)
+
+            # 是否清 allure-results（慎用）
+            if clean_results:
+                self.mkdir(PRPORE_JSON_DIR)
+                self.clean_report(PRPORE_JSON_DIR)
+
+            # 截图目录可以清
+            self.mkdir(PRPORE_SCREEN_DIR)
+            self.clean_report(PRPORE_SCREEN_DIR)
+
+            logger.info('测试报告清理完成')
+
+        except Exception as e:
+            logger.error(e)
 
 
 class AlgorithmClassify:
@@ -464,9 +521,115 @@ class ImgDiff:
 #     print(l)
 
 
-def is_assertion(test_data: dict, actual_value: str):
+# def is_assertion(test_data: dict, actual_value: str):
+#     """
+#     执行 YAML 定义的断言
+#     """
+#
+#     expected = test_data.get("assertion")
+#     assert_type = test_data.get("assertype")
+#
+#     if expected is None or assert_type is None:
+#         raise ValueError("断言配置不完整")
+#
+#     if assert_type == "==":
+#         assert actual_value == expected, \
+#             f"[断言失败] 期望={expected}, 实际={actual_value}"
+#
+#     elif assert_type == "!=":
+#         assert actual_value != expected, \
+#             f"[断言失败] 期望≠{expected}, 实际={actual_value}"
+#
+#     elif assert_type == "in":
+#         assert expected in actual_value, \
+#             f"[断言失败] 期望包含={expected}"
+#
+#     elif assert_type == "notin":
+#         assert expected not in actual_value, \
+#             f"[断言失败] 期望不包含={expected}"
+#
+#     else:
+#         raise ValueError(f"不支持的断言类型: {assert_type}")
+
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.common.exceptions import TimeoutException
+
+
+# def is_assertion(
+#     test_data: dict,
+#     actual_value_func,
+#     driver,
+#     timeout: int = 5
+# ):
+#     """
+#     执行 YAML 定义的断言（稳定版）
+#     :param test_data: YAML 中的断言配置
+#     :param actual_value_func: 一个可调用对象，用于动态获取 actual_value
+#     :param driver: WebDriver
+#     :param timeout: 等待超时时间
+#     """
+#
+#     expected = test_data.get("assertion")
+#     assert_type = test_data.get("assertype")
+#
+#     if expected is None or assert_type is None:
+#         raise ValueError("断言配置不完整")
+#
+#     # ========= 瞬时断言（无需等待） =========
+#     if assert_type == "==":
+#         actual_value = actual_value_func()
+#         assert actual_value == expected, \
+#             f"[断言失败] 期望={expected}, 实际={actual_value}"
+#
+#     elif assert_type == "!=":
+#         actual_value = actual_value_func()
+#         assert actual_value != expected, \
+#             f"[断言失败] 期望≠{expected}, 实际={actual_value}"
+#
+#     # ========= 等待型断言（核心改造点） =========
+#     elif assert_type in ("in", "notin"):
+#         last_actual = None
+#
+#         def _cond(_):
+#             nonlocal last_actual
+#             last_actual = actual_value_func()
+#             if not last_actual:
+#                 return False
+#
+#             if assert_type == "in":
+#                 return expected in last_actual
+#             else:
+#                 return expected not in last_actual
+#
+#         try:
+#             WebDriverWait(driver, timeout).until(_cond)
+#         except TimeoutException:
+#             raise AssertionError(
+#                 f"[断言失败]\n"
+#                 f"断言类型: {assert_type}\n"
+#                 f"期望值: {expected}\n"
+#                 f"等待时间: {timeout}s\n"
+#                 f"实际内容: {last_actual}"
+#             )
+#
+#     else:
+#         raise ValueError(f"不支持的断言类型: {assert_type}")
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
+
+
+def is_assertion(
+    test_data: dict,
+    actual_value_func,
+    driver,
+    timeout: int = 5
+):
     """
-    执行 YAML 定义的断言
+    稳定版断言（wait + assert）
+    :param test_data: yaml 中的断言配置
+    :param actual_value_func: 获取实时 actual_value 的函数
+    :param driver: webdriver
+    :param timeout: 最大等待时间
     """
 
     expected = test_data.get("assertion")
@@ -475,21 +638,39 @@ def is_assertion(test_data: dict, actual_value: str):
     if expected is None or assert_type is None:
         raise ValueError("断言配置不完整")
 
-    if assert_type == "==":
-        assert actual_value == expected, \
-            f"[断言失败] 期望={expected}, 实际={actual_value}"
+    last_actual = None
 
-    elif assert_type == "!=":
-        assert actual_value != expected, \
-            f"[断言失败] 期望≠{expected}, 实际={actual_value}"
+    def condition(_):
+        nonlocal last_actual
+        last_actual = actual_value_func()
+        if not last_actual:
+            return False
 
-    elif assert_type == "in":
-        assert expected in actual_value, \
-            f"[断言失败] 期望包含={expected}"
+        if assert_type == "==":
+            return last_actual == expected
 
-    elif assert_type == "notin":
-        assert expected not in actual_value, \
-            f"[断言失败] 期望不包含={expected}"
+        if assert_type == "!=":
+            return last_actual != expected
 
-    else:
+        if assert_type == "in":
+            return expected in last_actual
+
+        if assert_type == "notin":
+            return expected not in last_actual
+
         raise ValueError(f"不支持的断言类型: {assert_type}")
+
+    try:
+        WebDriverWait(driver, timeout).until(condition)
+
+    except TimeoutException:
+        raise AssertionError(
+            f"""
+            断言失败（等待 {timeout}s 仍未满足）
+            ----------------------------------------
+            断言类型 : {assert_type}
+            期望值   : {expected}
+            实际值   : {last_actual}
+            ----------------------------------------
+            """
+        )

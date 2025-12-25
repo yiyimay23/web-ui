@@ -141,7 +141,7 @@ class WebInit:
             else:
                 return False
         except Exception as e:
-            logger.error(f'请求地址异常{e}！！')
+            logger.error(f'请求地址异常{e}！！请检查地址和网络')
 
     @property
     def url(self) -> str:
@@ -283,7 +283,7 @@ class WebInit:
                     logger.error(f'当前{current_sys}系统不支持！')
 
             else:
-                logger.error('项目地址请求异常！！！')
+                logger.error('项目地址请求异常！！！请检查地址和网络！')
 
 
         except SessionNotCreatedException:

@@ -13,14 +13,19 @@ web\APP-ui-auto (python+selenium+pytest+allure)
 
 ```python
 # 安装所需的依赖环境(阿里源安装 * 操作系统中必须有python3, 推荐python3.8或者更高版本)
+本用例使用的是3.9.6
+
 # 先自行安装Node.js\selenium\appium\allure
+
 # 安装配置Allure(官网下载解压包)
+https://github.com/allure-framework/allure2/releases
 
-解压allure - commandline - 2.13.6.zip包到对应目录
+解压allure - commandline - 2.30.0.zip包到对应目录
 
-把allure - commandline - 2.13.6 / bin加入到环境变量
+把allure - commandline - 2.30.0 / bin加入到环境变量
 
 打开控制台输入: allure - -version出来版本代表安装成功
+
 # ===================================
 
 pip
