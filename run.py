@@ -194,7 +194,7 @@ class RunPytest:
 
         # ===== 默认参数(非常重要）=====
         results_dir = "debug"  # debug / prod  调试/正式
-        module_name = "testbaidu_web_auto"  # pytest -m
+        module_name = "testbaidu_web or testbaidu_web_auto"  # pytest -m
         mlist = []  # 预留
         thread_num = 1
         reruns = 0
@@ -349,38 +349,11 @@ class RunPytest:
                 reports_path=prpore_allure_dir,
                 filename="test_report"
             )
+            logger.info('邮件推送完成')
 
-        # cls.notice_type(is_notice, html_index)  # 设置是发送企业微信还是钉钉，还是不发送
         cls.send_notice(html_index, is_notice)  # 设置是发送企业微信还是钉钉，还是不发送,还是都发送
 
         return html_index
-
-
-    # @staticmethod
-    # def run_bebug():
-    #     """
-    #     bebug 调试
-    #     :return:
-    #     """
-    #
-    #     # 执行前检查是否清除报告
-    #     # DelReport().run_del_report()
-    #     # 运行前，可以清allure-results
-    #     DelReport().run_del_report(clean_results=True)
-    #     # -m=标签名：执行被 @pytest.mark.标签名 标记的用例。
-    #     pytest.main(
-    #         ['-m', 'testbaidu_web_auto', '-n=1', '--reruns=0', '--alluredir', f'{PRPORE_JSON_DIR}', f'{CASE_DIR}'])
-    #
-    #     #生成测试报告
-    #     os.system(f'allure generate {PRPORE_JSON_DIR} -o {PRPORE_ALLURE_DIR} --clean')
-    #     logger.info('测试报告生成完成！')
-    #     #
-    #     # # 发送邮件zip格式
-    #     # SendEMail().send_file(content='demo项目测试完成已经完成发送报告请查收', subject='demo项目测测试结果', reports_path=PRPORE_ALLURE_DIR,
-    #     #                       filename='testport')
-    #     #
-    #     # logger.info('邮件推送完成')
-
 
     @staticmethod
     def run_debug():
@@ -391,16 +364,7 @@ class RunPytest:
         RunPytest.run()
 
 
-# if __name__ == '__main__':
-#     RunPytest.run()
-#     # RunPytest.run_debug()
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        RunPytest.run()        # CI / 命令行
-    else:
-        RunPytest.run_debug()  # PyCharm
-
-
+# 默认执行用例模块在receiving_argv()中设置
 #  Python run.py dir all(项目或者模块) 1(线程数) 1(失败重跑次数)  False(不开启邮件发送) False(不启用企业微信钉钉消息通知)
 # 项目根目录下，命令行执行
 # debug
@@ -422,6 +386,7 @@ if __name__ == "__main__":
 # sys.argv[6]  is_notice       (可选)
 
 # addopts 参数说明
+# pytest
 # -s：输出调试信息，包括print打印的信息。
 # -v：显示更详细的信息。
 # -q：显示简略的结果 与-v相反
@@ -437,3 +402,9 @@ if __name__ == "__main__":
 # --ff: 如果上次测试用例出现失败的用例，当使用--ff后，失败的测试用例会首先执行，剩余的用例也会再次执行一次 *基于生成了.pytest_cache文件
 # --lf: 当一个或多个用例失败后，定位到最后一个失败的用例重新运行，后续用例会停止运行。*基于生成了.pytest_cache文件
 # --html=report.html: 在当前目录生成名为report.html的测试报告 需要安装 pytest-html 插件模块。
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        RunPytest.run()        # CI / 命令行
+    else:
+        RunPytest.run_debug()  # PyCharm
